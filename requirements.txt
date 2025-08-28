@@ -3,3 +3,8 @@ langchain-core==0.3.69
 langchain-openai==0.3.28
 langchain-text-splitters==0.3.8
 langgraph==0.5.3
+
+pydantic~=2.11.7
+litellm~=1.76.0
+graphlib~=0.9.5
+tenacity~=9.1.2

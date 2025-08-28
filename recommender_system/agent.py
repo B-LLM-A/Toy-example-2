@@ -6,6 +6,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from pydantic import BaseModel, Field
 
 from recommender_system.prompts.profile_extractor import PROFILE_EXTRACTOR_PROMPT
+from recommender_system.user_simulation.user import User
 
 
 class FuelType(str, Enum):
@@ -49,7 +50,6 @@ def merge_partial_update(state: CarRecommendationState, update: UpdateCarProfile
 
 
 def agent_node(state: CarRecommendationState):
-    print(f"current state: {state}")
     # Get the last user message
     last_message = state["messages"][-1]
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -81,7 +81,7 @@ def agent_node(state: CarRecommendationState):
     result = llm.invoke([SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary))] + updates["messages"])
     if result.content:
         updates["messages"].append(AIMessage(result.content))
-        print(result.content)
+        print(f"Recommender: {result.content}")
     else:
         print(f"[no content!] result = {result}")
 
@@ -117,14 +117,69 @@ if __name__ == "__main__":
     print("-" * 40)
 
     current_state = initial_state
+    user = User(persona_str="""
+{
+  "persona_name": "Practical Value Seeker",
+  "personality_traits": [
+    "practical",
+    "budget-conscious",
+    "value-oriented",
+    "detail-oriented"
+  ],
+  "decision_making_style": "budget-first with practical focus",
+  "primary_motivations": [
+    "long-term value",
+    "financial security",
+    "reliability"
+  ],
+  "lifestyle_patterns": {
+    "usage_type": "daily commuting and occasional road trips",
+    "budget_approach": "cost-effective with focus on maximizing value",
+    "risk_tolerance": "conservative",
+    "time_horizon": "long-term focused"
+  },
+  "communication_preferences": {
+    "information_depth": "high-detail",
+    "tone": "technical",
+    "focus_areas": [
+      "value for money",
+      "practicality",
+      "warranty and safety features"
+    ]
+  },
+  "behavioral_patterns": {
+    "research_depth": "extensive",
+    "feature_priorities": [
+      "versatility",
+      "warranty coverage",
+      "safety ratings",
+      "cost efficiency"
+    ],
+    "deal_breakers": [
+      "lack of value",
+      "poor warranty",
+      "high maintenance costs"
+    ],
+    "compromise_willingness": "willing to compromise on performance and luxury for better value and practicality"
+  },
+  "simulation_keywords": [
+    "excellent value",
+    "versatility",
+    "budget-minded",
+    "practicality",
+    "warranty protection"
+  ]
+}
+""")
 
     while True:
-        user_input = input("You: ")
-        if user_input.lower().strip() in {"exit", "quit", ""}:
+        user_input = user.chat(current_state["messages"])
+        if "###STOP###" in user_input:
             break
 
         # Add user message to state
         current_state["messages"].append(HumanMessage(content=user_input))
+        print(f"User: {user_input}")
 
         try:
             # Invoke the graph
