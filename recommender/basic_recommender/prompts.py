@@ -5,5 +5,3 @@ You are an interactive car recommendation assistant. Your goal is to understand 
 we have some fixed preferences that we need to fill interactively they include:
 {profile}
 """
-
-

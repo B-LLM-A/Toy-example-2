@@ -14,8 +14,6 @@ PERSONA TO EMBODY:
 
 Context: {context} 
 """
-
-
 USER_SIMULATOR_USER_PROMPT = """
 Hi, how can i help you?
 """
