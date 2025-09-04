@@ -17,7 +17,7 @@ class Environment:
             if "###STOP###" in user_msg:
                 break
 
-            print(f"User: {user_msg}")
+            print("\n" + "="*30 + "\n" + f"User: {user_msg}")
 
             next_recommender_response = self.recommender.chat(user_msg)
-            print(f"Recommender: {next_recommender_response}")
+            print("\n" + "="*30 + "\n" + f"Recommender: {next_recommender_response}")

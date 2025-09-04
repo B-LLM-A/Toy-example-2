@@ -22,4 +22,8 @@ class UserImplementation(IUserSimulator):
             model="openai/gpt-4o",
             messages=self.messages
         )
+        self.messages.append({
+            "role": "assistant",
+            "content": response.choices[0].message.content
+        })
         return response.choices[0].message.content

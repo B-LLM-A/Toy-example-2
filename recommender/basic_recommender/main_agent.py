@@ -5,6 +5,7 @@ from langgraph.graph import MessagesState
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from recommender.basic_recommender.prompts import PROFILE_EXTRACTOR_PROMPT
+from recommender.item_set import item_set
 
 
 class FuelType(str, Enum):
@@ -75,7 +76,9 @@ def agent_node(state: CarRecommendationState):
         "fuel_type": updates.get("fuel_type", state.get("fuel_type"))
     }
 
-    result = llm.invoke([SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary))] + updates["messages"])
+    result = llm.invoke([SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary, item_set=item_set))]
+                        + updates["messages"])
+
     if result.content:
         updates["messages"].append(AIMessage(result.content))
     else:

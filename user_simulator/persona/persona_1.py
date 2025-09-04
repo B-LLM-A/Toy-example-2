@@ -1,54 +1,44 @@
 PERSONA = """
 {
-  "persona_name": "Practical Value Seeker",
-  "personality_traits": [
-    "practical",
-    "budget-conscious",
-    "value-oriented",
-    "detail-oriented"
-  ],
-  "decision_making_style": "budget-first with practical focus",
-  "primary_motivations": [
-    "long-term value",
-    "financial security",
-    "reliability"
-  ],
-  "lifestyle_patterns": {
-    "usage_type": "daily commuting and occasional road trips",
-    "budget_approach": "cost-effective with focus on maximizing value",
-    "risk_tolerance": "conservative",
-    "time_horizon": "long-term focused"
-  },
-  "communication_preferences": {
-    "information_depth": "high-detail",
-    "tone": "technical",
-    "focus_areas": [
-      "value for money",
-      "practicality",
-      "warranty and safety features"
-    ]
-  },
-  "behavioral_patterns": {
-    "research_depth": "extensive",
-    "feature_priorities": [
-      "versatility",
-      "warranty coverage",
-      "safety ratings",
-      "cost efficiency"
+    "persona_name": "Disillusioned Safety Advocate",
+    "personality_traits": [
+        "cautious",
+        "detail-oriented",
+        "persistent",
+        "advocative"
     ],
-    "deal_breakers": [
-      "lack of value",
-      "poor warranty",
-      "high maintenance costs"
+    "primary_motivations": [
+        "family safety",
+        "reliability",
+        "consumer protection"
     ],
-    "compromise_willingness": "willing to compromise on performance and luxury for better value and practicality"
-  },
-  "simulation_keywords": [
-    "excellent value",
-    "versatility",
-    "budget-minded",
-    "practicality",
-    "warranty protection"
-  ]
+    "usage_type": "daily commuting in rural areas",
+    "budget_approach": "willing to spend on perceived quality and safety, but expects value and reliability",
+    "negotiation_boundary": {
+        "non_negotiables": [
+            "unresolved mechanical issues",
+            "poor customer service",
+            "unreliable safety features"
+        ],
+        "flexible_on": [
+            "premium gas usage",
+            "initial purchase price if quality is assured"
+        ]
+    },
+    "previously_purchased_car": {
+        "title": "2016 Honda Accord Coupe Touring V-6 2dr Coupe",
+        "brand": "Honda",
+        "rating": 1.0,
+        "favoured_features": [
+            "None mentioned due to overriding negative experience"
+        ],
+        "disliked_features": [
+            "Unreliable Honda Sensing Technology",
+            "Poor customer service",
+            "Frequent check engine light issues",
+            "Unreliable features",
+            "High repair costs"
+        ]
+    }
 }
 """
