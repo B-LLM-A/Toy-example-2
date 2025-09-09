@@ -1,6 +1,4 @@
-from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import SystemMessage
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 from judge.judge_interface import IJudge
@@ -43,7 +41,7 @@ class JudgeImplementation(IJudge):
 
         return True
 
-    def evaluate_user_simulation(self, persona: str, raw_review: str) -> float:
+    def evaluate_user_simulation(self, persona: str, raw_review: str) -> dict:
         user_criteria = {
             "clarity": "Is the user's message clear and understandable within the context?",
             "engagement": "Does the user keep the conversation flowing and invite meaningful responses?",
@@ -51,8 +49,12 @@ class JudgeImplementation(IJudge):
             "persona_alignment": "Does the message reflect the user's stated persona, preferences, and writing style?"
         }
         conversation = self.get_conversation()
-        total_score = 0
-        num_scores = 0
+        scores_dict = {
+            "clarity": [],
+            "engagement": [],
+            "coherence_with_context": [],
+            "persona_alignment": []
+        }
         for turn_idx, turn in enumerate(conversation):
             if turn["role"] != "user":
                 continue
@@ -73,22 +75,16 @@ class JudgeImplementation(IJudge):
                 criteria=user_criteria
             )
             scores: UserEvaluationScoreSet = self.user_evaluator.invoke([SystemMessage(evaluation_prompt)])
-            print(f"scores: {scores}")
 
-            # Accumulate scores
-            score_values = [
-                scores.clarity_score,
-                scores.engagement_score,
-                scores.coherence_with_context_score,
-                scores.persona_alignment_score
-            ]
-            total_score += sum(score_values)
-            num_scores += len(score_values)
+            # Append scores to dict
+            scores_dict["clarity"].append(scores.clarity_score)
+            scores_dict["engagement"].append(scores.engagement_score)
+            scores_dict["coherence_with_context"].append(scores.coherence_with_context_score)
+            scores_dict["persona_alignment"].append(scores.persona_alignment_score)
 
-        # Return average score
-        return total_score / num_scores if num_scores > 0 else 0.0
+        return scores_dict
 
-    def evaluate_recommender(self) -> float:
+    def evaluate_recommender(self) -> dict:
         recommender_criteria = {
             "relevance": "Is the assistant's response relevant to the user's message?",
             "helpfulness": "Does the response provide useful recommendations or information?",
@@ -96,8 +92,12 @@ class JudgeImplementation(IJudge):
             "engagement": "Does the response encourage further interaction?"
         }
         conversation = self.get_conversation()
-        total_score = 0
-        num_scores = 0
+        scores_dict = {
+            "relevance": [],
+            "helpfulness": [],
+            "coherence_with_context": [],
+            "engagement": []
+        }
         for turn_idx, turn in enumerate(conversation):
             if turn["role"] != "assistant":
                 continue
@@ -107,26 +107,20 @@ class JudgeImplementation(IJudge):
             context_text = "\n".join(f"{t['role'].upper()}: {t['content']}" for t in context_up_to_now)
 
             # This recommender's message
-            user_message = turn["content"]
+            assistant_message = turn["content"]
 
             # Evaluate using the chain
             evaluation_prompt = JUDGE_RECOMMENDER_PROMPT_TEMPLATE.format(
                 context=context_text,
-                message=user_message,
+                message=assistant_message,
                 criteria=recommender_criteria
             )
             scores: RecommenderEvaluationScoreSet = self.recommender_evaluator.invoke([SystemMessage(evaluation_prompt)])
-            print(f"scores: {scores}")
 
-            # Accumulate scores
-            score_values = [
-                scores.engagement_score,
-                scores.helpfulness_score,
-                scores.coherence_with_context_score,
-                scores.relevance_score
-            ]
-            total_score += sum(score_values)
-            num_scores += len(score_values)
+            # Append scores to dict
+            scores_dict["relevance"].append(scores.relevance_score)
+            scores_dict["helpfulness"].append(scores.helpfulness_score)
+            scores_dict["coherence_with_context"].append(scores.coherence_with_context_score)
+            scores_dict["engagement"].append(scores.engagement_score)
 
-        # Return average score
-        return total_score / num_scores if num_scores > 0 else 0.0
+        return scores_dict
