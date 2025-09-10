@@ -52,6 +52,7 @@ def agent_node(state: CarRecommendationState):
     last_message = state["messages"][-1]
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
+
     structured_llm = llm.with_structured_output(UpdateCarProfileSchema)
 
     # Extract information from user input
