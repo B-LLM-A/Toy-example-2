@@ -9,6 +9,9 @@ Rules:
 - Do not repeat the exact instruction in the conversation. Instead, use your own words to convey the same information.
 - Try to make the conversation as natural as possible, and stick to the personalities in the instruction.
 
+You also wrote this review for another car:
+{review}
+
 PERSONA TO EMBODY:
 {persona}
 

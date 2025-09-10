@@ -52,7 +52,7 @@ def merge_partial_update(state: CarRecommendationState, update: UpdateCarProfile
 
 def agent_node(state: CarRecommendationState):
     last_message = state["messages"][-1]
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
 
 
     structured_llm = llm.with_structured_output(UpdateCarProfileSchema)

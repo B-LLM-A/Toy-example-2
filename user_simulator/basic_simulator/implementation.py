@@ -2,6 +2,7 @@ from litellm import completion
 from prompts.user_prompts import USER_SIMULATION_SYSTEM_PROMPT
 from typing import Optional
 from user_simulator.user_interface import IUserSimulator
+from user_simulator.persona.GoalBased.persona_1 import RAW_REVIEW
 
 
 class UserImplementation(IUserSimulator):
@@ -10,7 +11,8 @@ class UserImplementation(IUserSimulator):
         self.messages = [
             {"role": "system", "content": USER_SIMULATION_SYSTEM_PROMPT.format(
                 persona=self.persona,
-                context="You want to buy a new car, and need some guidance and recommendation"
+                context="You want to buy a new car, and need some guidance and recommendation",
+                review=RAW_REVIEW
             )}
         ]
 
