@@ -1,5 +1,5 @@
 from litellm import completion
-from user_simulator.basic_simulator.prompts import USER_SIMULATION_SYSTEM_PROMPT, USER_SIMULATOR_USER_PROMPT
+from prompts.user_prompts import USER_SIMULATION_SYSTEM_PROMPT
 from typing import Optional
 from user_simulator.user_interface import IUserSimulator
 
@@ -11,8 +11,7 @@ class UserImplementation(IUserSimulator):
             {"role": "system", "content": USER_SIMULATION_SYSTEM_PROMPT.format(
                 persona=self.persona,
                 context="You want to buy a new car, and need some guidance and recommendation"
-            )},
-            {"role": "user", "content": USER_SIMULATOR_USER_PROMPT}
+            )}
         ]
 
     def chat(self, new_message: Optional[str] = None) -> str:

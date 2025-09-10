@@ -7,7 +7,7 @@ from environment.environment import Environment
 from judge.basic_judge.implementation import JudgeImplementation
 
 if __name__ == "__main__":
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
     judge = JudgeImplementation(llm)
     user = UserImplementation(persona=PERSONA, raw_review=RAW_REVIEW)
     recommender = RecommenderImplementation()

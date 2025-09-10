@@ -2,7 +2,7 @@ from langchain_core.messages import SystemMessage
 from pydantic import BaseModel, Field
 
 from judge.judge_interface import IJudge
-from judge.basic_judge.prompts import (JUDGE_USER_MESSAGE_PROMPT_TEMPLATE,
+from prompts.judge_prompts import (JUDGE_USER_MESSAGE_PROMPT_TEMPLATE,
                                        JUDGE_RECOMMENDER_MESSAGE_PROMPT_TEMPLATE,
                                        JUDGE_USER_CONVERSATION_PROMPT_TEMPLATE,
                                        JUDGE_RECOMMENDER_CONVERSATION_PROMPT_TEMPLATE)

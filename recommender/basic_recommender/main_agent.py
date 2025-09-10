@@ -4,7 +4,7 @@ from enum import Enum
 from langgraph.graph import MessagesState
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from recommender.basic_recommender.prompts import PROFILE_EXTRACTOR_PROMPT
+from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
 from tools.websearch import tavily_tool
 from langgraph.prebuilt import create_react_agent
@@ -52,7 +52,7 @@ def merge_partial_update(state: CarRecommendationState, update: UpdateCarProfile
 
 def agent_node(state: CarRecommendationState):
     last_message = state["messages"][-1]
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
 
 
     structured_llm = llm.with_structured_output(UpdateCarProfileSchema)
@@ -81,7 +81,7 @@ def agent_node(state: CarRecommendationState):
 
     # Set of all tools to be bind
     tools = [tavily_tool]
-    
+
     react_agent = create_react_agent(model=llm, tools=tools)
 
     llm_input = {"messages": [SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary, item_set=item_set))]
