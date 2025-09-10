@@ -18,6 +18,7 @@ Performance_Driven_Adventurer = """
         "confident"
     ],
     "primary_motivations": [
+        "very eager to buy Lamborghini Revuelto",
         "competitive driving",
         "thrill of speed",
         "performance excellence"
