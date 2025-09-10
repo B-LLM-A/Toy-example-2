@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from recommender.basic_recommender.prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
+from tools.websearch import tavily_tool
+from langgraph.prebuilt import create_react_agent
 
 
 class FuelType(str, Enum):
@@ -76,11 +78,17 @@ def agent_node(state: CarRecommendationState):
         "fuel_type": updates.get("fuel_type", state.get("fuel_type"))
     }
 
-    result = llm.invoke([SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary, item_set=item_set))]
-                        + updates["messages"])
+    # Set of all tools to be bind
+    tools = [tavily_tool]
+    
+    react_agent = create_react_agent(model=llm, tools=tools)
 
-    if result.content:
-        updates["messages"].append(AIMessage(result.content))
+    llm_input = {"messages": [SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary, item_set=item_set))]
+                        + updates["messages"]}
+    result = react_agent.invoke(llm_input)
+
+    if result["messages"][-1].content:
+        updates["messages"].append(AIMessage(result["messages"][-1].content))
     else:
         print(f"[no content!] result = {result}")
 
