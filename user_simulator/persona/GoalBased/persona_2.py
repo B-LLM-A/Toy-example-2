@@ -32,3 +32,22 @@ This persona is an outdoor enthusiast who values reliability and versatility in 
 
 10. I’m thinking about a second vehicle for city driving. What smaller, efficient options are there that still allow me to carry my gear?
 """
+
+GOALS = {
+    "FOR_TEEN": """
+Wants a truck or SUV that is easier to handle than their current Tacoma but still tough enough for a teenager to take 
+on camping trips or occasional outdoor adventures. Safety and reliability are top priorities, but the vehicle should 
+also introduce their teen to the same adventurous lifestyle they value.
+""",
+    "EXPLORATORY": """
+Curious to see if other adventure-ready brands can match Toyota’s balance of reliability and off-road strength. Open to 
+testing rugged models from Jeep or Ford to see if they offer more passenger comfort or modern features while still 
+handling mountain trails and ski trips without compromise.
+""",
+    "LOYAL": """
+Looks to move up to a newer Tacoma or a 4Runner that offers more rear-seat comfort for passengers while preserving the 
+durability and hauling capacity they rely on. Seeks a model that feels like a natural upgrade from their trusted truck, 
+with improvements in space and convenience for long outdoor weekends.
+"""
+
+}

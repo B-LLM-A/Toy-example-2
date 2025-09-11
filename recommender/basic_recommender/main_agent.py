@@ -8,6 +8,8 @@ from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
 from tools.websearch import tavily_tool
 from langgraph.prebuilt import create_react_agent
+from langchain_community.tools import DuckDuckGoSearchResults
+
 
 
 class FuelType(str, Enum):
@@ -80,13 +82,17 @@ def agent_node(state: CarRecommendationState):
     }
 
     # Set of all tools to be bind
-    tools = [tavily_tool]
+    tools = [DuckDuckGoSearchResults(num_results=5)]
 
     react_agent = create_react_agent(model=llm, tools=tools)
 
     llm_input = {"messages": [SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary, item_set=item_set))]
                         + updates["messages"]}
     result = react_agent.invoke(llm_input)
+
+    # for action, observation in result.get("intermediate_steps", []):
+    #     if isinstance(observation, Exception):
+    #         print("Tool error:", observation)
 
     if result["messages"][-1].content:
         updates["messages"].append(AIMessage(result["messages"][-1].content))

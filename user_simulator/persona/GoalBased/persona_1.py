@@ -24,3 +24,22 @@ This reviewer is a seasoned Jaguar enthusiast, having owned three Jaguars, indic
 - Understand the resale value of my Jaguar and how it might affect my decision to upgrade or keep it.
 
 """
+
+GOALS = {
+    "FOR_TEEN": """
+Wants to purchase a safe, reliable, and reasonably fuel-efficient vehicle for their teenager. While Jaguar may still be 
+a preference, they are open to considering other brands if they offer better safety ratings, easier handling, and lower 
+maintenance demands suitable for a young driver.
+""",
+    "EXPLORATORY": """
+Although highly satisfied with Jaguar, they are curious about alternatives. They want to test-drive luxury competitors 
+(e.g., Lexus, BMW, Mercedes) to compare comfort, fuel economy, and overall driving experience while still holding 
+Jaguar as the benchmark brand.
+""",
+    "LOYAL": """
+Wants to upgrade to a newer Jaguar model that preserves the comfort, fuel economy, and power they value. They are 
+primarily interested in a certified pre-owned or brand-new Jaguar that minimizes maintenance surprises and maximizes 
+long-term satisfaction.
+"""
+
+}
