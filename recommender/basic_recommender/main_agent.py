@@ -9,7 +9,8 @@ from recommender.item_set import item_set
 from recommender.basic_recommender.fueleconomy_agent import FUELECONOMY_AGENT_TOOL
 from recommender.basic_recommender.nhtsa_agent import NHTSA_AGENT_TOOL
 from tools.websearch import tavily_tool
-from tools.NHTSA import get_car_safety_details
+# from tools.NHTSA import get_car_safety_details
+from tools.autodev import auto_dev_inventory_tool
 from langgraph.prebuilt import create_react_agent
 from langchain_community.tools import DuckDuckGoSearchResults
 
@@ -26,6 +27,7 @@ class CarRecommendationState(MessagesState):
     budget: Optional[int]
     preferred_brands: Optional[List[str]]
     fuel_type: Optional[FuelType]
+    location: Optional[List[str]] # Country, State, City, Zipcode
 
 
 class UpdateCarProfileSchema(BaseModel):
@@ -87,9 +89,10 @@ def agent_node(state: CarRecommendationState):
     # Set of all tools to be bound
     # Supervisor pattern: main agent can call sub-agents (e.g., fueleconomy_agent)
     tools = [
-        DuckDuckGoSearchResults(num_results=5),
+        # DuckDuckGoSearchResults(num_results=5),
         FUELECONOMY_AGENT_TOOL,
         NHTSA_AGENT_TOOL,
+        auto_dev_inventory_tool
     ]
 
     react_agent = create_react_agent(model=llm, tools=tools)
