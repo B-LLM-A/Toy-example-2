@@ -7,6 +7,7 @@ from typing import Optional, List
 from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
 from tools.websearch import tavily_tool
+from tools.NHTSA import get_car_safety_details
 from langgraph.prebuilt import create_react_agent
 from langchain_community.tools import DuckDuckGoSearchResults
 
@@ -82,7 +83,10 @@ def agent_node(state: CarRecommendationState):
     }
 
     # Set of all tools to be bind
-    tools = [DuckDuckGoSearchResults(num_results=5)]
+    tools = [
+                DuckDuckGoSearchResults(num_results=5),
+                get_car_safety_details
+            ]
 
     react_agent = create_react_agent(model=llm, tools=tools)
 
