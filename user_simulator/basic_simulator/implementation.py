@@ -3,22 +3,55 @@ from prompts.user_prompts import USER_SIMULATION_SYSTEM_PROMPT, CarState
 from typing import Optional
 from user_simulator.user_interface import IUserSimulator
 from user_simulator.persona.GoalBased.persona_1 import RAW_REVIEW
+import json
+import random
+from pathlib import Path
+import logging
 
 
 class UserImplementation(IUserSimulator):
     def __init__(self, persona: str, raw_review: str, goal: str):
         super().__init__(persona, raw_review)
+        location = self._sample_location()
         system_prompt_format = USER_SIMULATION_SYSTEM_PROMPT.format(
             persona=self.persona,
             car_state=CarState.NEW_CAR,
             review=RAW_REVIEW,
             goal=goal,
-            location="Paris, France"
+            location=location
         )
-        # print(f"\nUSER_SYSTEM_PROMPT:\n {system_prompt_format}\n")
+        print(f"\nUSER_SYSTEM_PROMPT:\n {system_prompt_format}\n")
         self.messages = [
             {"role": "system", "content": system_prompt_format}
         ]
+
+    def _sample_location(self) -> str:
+        """Sample a random location from user_data/zipcodes.json.
+
+        Returns a nice string like: "City, State Full, United States".
+        Falls back to "Paris, France" if anything goes wrong.
+        """
+        try:
+            data_path = Path(__file__).resolve().parent.parent / "user_data" / "zipcodes.json"
+            with data_path.open("r", encoding="utf-8") as f:
+                zips = json.load(f)
+            if not isinstance(zips, list) or not zips:
+                raise ValueError("zipcodes.json is empty or invalid")
+            rec = random.choice(zips)
+            city = rec.get("city") or ""
+            state_full = rec.get("state_full") or ""
+            country = rec.get("country") or "United States"
+            zipcode = rec.get("zip_code") or "11111"
+            # Prefer full state name when available
+            parts = [p for p in [city, state_full, zipcode, country] if p]
+            if not parts:
+                raise ValueError("chosen zipcode record missing fields")
+            return ", ".join(parts)
+        except Exception as e:
+            logging.getLogger("user_simulator").warning(
+                f"Falling back to default location due to error: {e}"
+            )
+            return "Fischer, Texas, United States"
 
     def chat(self, new_message: Optional[str] = None) -> str:
         if new_message:
