@@ -15,7 +15,7 @@ class UserImplementation(IUserSimulator):
             goal=goal,
             location="Paris, France"
         )
-        print(f"\nUSER_SYSTEM_PROMPT:\n {system_prompt_format}\n")
+        # print(f"\nUSER_SYSTEM_PROMPT:\n {system_prompt_format}\n")
         self.messages = [
             {"role": "system", "content": system_prompt_format}
         ]

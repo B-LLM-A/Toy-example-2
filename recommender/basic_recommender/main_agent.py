@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
+from recommender.basic_recommender.fueleconomy_agent import FUELECONOMY_AGENT_TOOL
 from tools.websearch import tavily_tool
 from tools.NHTSA import get_car_safety_details
 from langgraph.prebuilt import create_react_agent
@@ -82,11 +83,13 @@ def agent_node(state: CarRecommendationState):
         "fuel_type": updates.get("fuel_type", state.get("fuel_type"))
     }
 
-    # Set of all tools to be bind
+    # Set of all tools to be bound
+    # Supervisor pattern: main agent can call sub-agents (e.g., fueleconomy_agent)
     tools = [
-                DuckDuckGoSearchResults(num_results=5),
-                get_car_safety_details
-            ]
+        DuckDuckGoSearchResults(num_results=5),
+        FUELECONOMY_AGENT_TOOL,
+        get_car_safety_details,
+    ]
 
     react_agent = create_react_agent(model=llm, tools=tools)
 

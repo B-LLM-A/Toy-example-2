@@ -1,4 +1,5 @@
 from langchain_openai import ChatOpenAI
+import logging
 
 from recommender.basic_recommender.implementation import RecommenderImplementation
 from user_simulator.basic_simulator.implementation import UserImplementation
@@ -8,9 +9,15 @@ from environment.environment import Environment
 from judge.basic_judge.implementation import JudgeImplementation
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
     judge = JudgeImplementation(llm)
     user = UserImplementation(persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["LOYAL"])
     recommender = RecommenderImplementation()
-    env = Environment(user, recommender)
-    env.run()
+    # env = Environment(user, recommender)
+    # env.run()
+    resp = recommender.chat("Find the fueleconomy information of honda civic 2023")
+    print(resp)
