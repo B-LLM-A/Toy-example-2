@@ -7,6 +7,7 @@ from typing import Optional, List
 from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
 from recommender.basic_recommender.fueleconomy_agent import FUELECONOMY_AGENT_TOOL
+from recommender.basic_recommender.nhtsa_agent import NHTSA_AGENT_TOOL
 from tools.websearch import tavily_tool
 from tools.NHTSA import get_car_safety_details
 from langgraph.prebuilt import create_react_agent
@@ -88,7 +89,7 @@ def agent_node(state: CarRecommendationState):
     tools = [
         DuckDuckGoSearchResults(num_results=5),
         FUELECONOMY_AGENT_TOOL,
-        get_car_safety_details,
+        NHTSA_AGENT_TOOL,
     ]
 
     react_agent = create_react_agent(model=llm, tools=tools)

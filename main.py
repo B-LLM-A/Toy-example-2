@@ -19,5 +19,5 @@ if __name__ == "__main__":
     recommender = RecommenderImplementation()
     # env = Environment(user, recommender)
     # env.run()
-    resp = recommender.chat("Find the fueleconomy information of honda civic 2023")
+    resp = recommender.chat("Find the safety ratings of 2025 genesis gv70")
     print(resp)
