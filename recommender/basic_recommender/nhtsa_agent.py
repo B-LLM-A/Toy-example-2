@@ -6,7 +6,7 @@ from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import StructuredTool
 import logging
 
-from tools.nhtsa import NHTSA_TOOLS
+from tools.nhtsa_structured_tool import NHTSA_TOOLS
 
 
 AGENT_SYSTEM_PROMPT = """

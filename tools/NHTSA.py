@@ -1,4 +1,4 @@
-# tools/nhtsa.py
+# tools/nhtsa_structured_tool.py
 import requests
 from langchain.agents import tool
 
