@@ -22,7 +22,9 @@ They need to know:
 
 Rules:
 - Just generate one line at a time to simulate the user's message.
-- If the instruction goal is satisfied, generate '###STOP###' as a standalone message without anything else to end the
+- If the instruction goal is satisfied, say the name of the car you want to buy and generate '###BUY###' as a standalone message without anything else to end the
+ conversation.
+- If the instruction goal is not satisfied, and the recommender is failing to recommend cars that you like, generate '###ABORT###' as a standalone message without anything else to end the
  conversation.
 - Do not repeat the exact instruction in the conversation. Instead, use your own words to convey the same information.
 - Try to make the conversation as natural as possible, and stick to the personalities in the persona provided.

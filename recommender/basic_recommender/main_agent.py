@@ -99,7 +99,7 @@ def agent_node(state: CarRecommendationState):
 
     react_agent = create_react_agent(model=llm, tools=tools)
 
-    llm_input = {"messages": [SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary, item_set=item_set))]
+    llm_input = {"messages": [SystemMessage(PROFILE_EXTRACTOR_PROMPT.format(profile=profile_summary))]
                         + updates["messages"]}
     result = react_agent.invoke(llm_input)
 

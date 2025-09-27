@@ -15,7 +15,7 @@ if __name__ == "__main__":
     )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
     judge = JudgeImplementation(llm)
-    user = UserImplementation(persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["LOYAL"])
+    user = UserImplementation(persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["EXPLORATORY"])
     recommender = RecommenderImplementation()
     env = Environment(user, recommender)
     env.run()

@@ -15,13 +15,14 @@ class Environment:
         next_recommender_response = None
         while True:
             user_msg = self.user.chat(next_recommender_response)
-            if "###STOP###" in user_msg:
+            if "###BUY###" in user_msg or "###ABORT###" in user_msg:
+                print("\n" + "*"*90 + "\n" + f"User: {user_msg}")
                 break
 
-            print("\n" + "="*30 + "\n" + f"User: {user_msg}")
+            print("\n" + "="*90 + "\n" + f"User: {user_msg}")
 
             next_recommender_response = self.recommender.chat(user_msg)
-            print("\n" + "="*30 + "\n" + f"Recommender: {next_recommender_response}")
+            print("\n" + "="*90 + "\n" + f"Recommender: {next_recommender_response}")
 
     def evaluate(self, judge: IJudge):
         print("Evaluation is running ...")
