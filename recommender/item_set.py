@@ -36,5 +36,5 @@ def load_car_samples(csv_path: str) -> list[CarSample]:
 # Example usage
 item_set = load_car_samples(CSV_PATH)
 
-print(f"Loaded {len(item_set)} car samples.")
-print(item_set[0])
+# print(f"Loaded {len(item_set)} car samples.")
+# print(item_set[0])

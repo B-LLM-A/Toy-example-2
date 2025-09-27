@@ -10,6 +10,7 @@ from recommender.basic_recommender.fueleconomy_agent import FUELECONOMY_AGENT_TO
 from recommender.basic_recommender.nhtsa_agent import NHTSA_AGENT_TOOL
 from tools.websearch import tavily_tool
 # from tools.NHTSA import get_car_safety_details
+from tools.distance_checker import distance_check
 from tools.autodev import auto_dev_inventory_tool
 from langgraph.prebuilt import create_react_agent
 from langchain_community.tools import DuckDuckGoSearchResults
@@ -92,7 +93,8 @@ def agent_node(state: CarRecommendationState):
         # DuckDuckGoSearchResults(num_results=5),
         FUELECONOMY_AGENT_TOOL,
         NHTSA_AGENT_TOOL,
-        auto_dev_inventory_tool
+        auto_dev_inventory_tool,
+        distance_check
     ]
 
     react_agent = create_react_agent(model=llm, tools=tools)

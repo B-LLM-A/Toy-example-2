@@ -10,14 +10,14 @@ from judge.basic_judge.implementation import JudgeImplementation
 
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO,
+        # level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
     judge = JudgeImplementation(llm)
     user = UserImplementation(persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["LOYAL"])
     recommender = RecommenderImplementation()
-    # env = Environment(user, recommender)
-    # env.run()
-    resp = recommender.chat("Find the availibility of 2024 Ford Mustang in Montgomery!")
-    print(resp)
+    env = Environment(user, recommender)
+    env.run()
+    # resp = recommender.chat("Find the availibility of 2024 Ford Mustang in Montgomery!")
+    # print(resp)
