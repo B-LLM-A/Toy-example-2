@@ -10,48 +10,47 @@ import logging
 
 
 class UserImplementation(IUserSimulator):
-    def __init__(self, persona: str, raw_review: str, goal: str):
+    def __init__(self, args, persona: str, raw_review: str, goal: str):
         super().__init__(persona, raw_review)
-        location = self._sample_location()
+        self.args = args
+        # Sample a location and store both structured & text versions
+        location_str, location_struct = self._sample_location()
+        self.location = location_struct  # <<<< structured form
+
         system_prompt_format = USER_SIMULATION_SYSTEM_PROMPT.format(
             persona=self.persona,
             car_state=CarState.NEW_CAR,
             review=RAW_REVIEW,
             goal=goal,
-            location=location
+            location=location_str
         )
-        print(f"\nUSER_SYSTEM_PROMPT:\n {system_prompt_format}\n")
-        self.messages = [
-            {"role": "system", "content": system_prompt_format}
-        ]
+        if self.args.verbose:
+            print(f"\nUSER_SYSTEM_PROMPT:\n {system_prompt_format}\n")
+        self.messages = [{"role": "system", "content": system_prompt_format}]
 
-    def _sample_location(self) -> str:
-        """Sample a random location from user_data/zipcodes.json.
 
-        Returns a nice string like: "City, State Full, United States".
-        Falls back to "Paris, France" if anything goes wrong.
-        """
+    def _sample_location(self):
+        """Return location as (string, dict)."""
         try:
             data_path = Path(__file__).resolve().parent.parent / "user_data" / "zipcodes.json"
             with data_path.open("r", encoding="utf-8") as f:
                 zips = json.load(f)
-            if not isinstance(zips, list) or not zips:
-                raise ValueError("zipcodes.json is empty or invalid")
             rec = random.choice(zips)
             city = rec.get("city") or ""
             state_full = rec.get("state_full") or ""
+            state_abbr = rec.get("state_id") or ""
             country = rec.get("country") or "United States"
             zipcode = rec.get("zip_code") or "11111"
-            # Prefer full state name when available
-            parts = [p for p in [city, state_full, zipcode, country] if p]
-            if not parts:
-                raise ValueError("chosen zipcode record missing fields")
-            return ", ".join(parts)
+
+            location_str = ", ".join([p for p in [city, state_full, zipcode, country] if p])
+            location_struct = {"city": city, "state": state_abbr or state_full, "zip": zipcode}
+
+            return location_str, location_struct
         except Exception as e:
             logging.getLogger("user_simulator").warning(
                 f"Falling back to default location due to error: {e}"
             )
-            return "Fischer, Texas, United States"
+            return "Fischer, Texas, United States", {"city": "Fischer", "state": "TX", "zip": "78623"}
 
     def chat(self, new_message: Optional[str] = None) -> str:
         if new_message:

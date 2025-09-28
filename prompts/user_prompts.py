@@ -22,10 +22,13 @@ They need to know:
 
 Rules:
 - Just generate one line at a time to simulate the user's message.
-- If the instruction goal is satisfied, say the name of the car you want to buy and generate '###BUY###' as a standalone message without anything else to end the
- conversation.
-- If the instruction goal is not satisfied, and the recommender is failing to recommend cars that you like, generate '###ABORT###' as a standalone message without anything else to end the
- conversation.
+- If the instruction goal is satisfied:
+    1. First state only the exact make, model, and production year of the car you want, without any extra words.
+       Example: "2025 Honda Civic LX"
+    2. On the same line, after a single space, append '###BUY###'
+       Example: "2025 Honda Civic LX ###BUY###"
+    3. This must be one single line in this exact format.
+- If the instruction goal is not satisfied, and the recommender is failing to recommend cars you like, generate '###ABORT###' as a standalone message without anything else to end the conversation.
 - Do not repeat the exact instruction in the conversation. Instead, use your own words to convey the same information.
 - Try to make the conversation as natural as possible, and stick to the personalities in the persona provided.
 - Use the user-written-review provided to impersonate their writing style, preferences and tone.

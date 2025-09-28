@@ -1,5 +1,6 @@
 from langchain_openai import ChatOpenAI
 import logging
+import argparse
 
 from recommender.basic_recommender.implementation import RecommenderImplementation
 from user_simulator.basic_simulator.implementation import UserImplementation
@@ -8,16 +9,32 @@ from user_simulator.persona.JsonPersona.persona_2 import PERSONA as PPERSONA, RA
 from environment.environment import Environment
 from judge.basic_judge.implementation import JudgeImplementation
 
-if __name__ == "__main__":
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--evaluate", action='store_true')
+    parser.add_argument("--verbose", action='store_true')
+
+    return parser.parse_args()
+
+def main():
+    # Parse arguments
+    args = parse_args()
+
     logging.basicConfig(
         # level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
     judge = JudgeImplementation(llm)
-    user = UserImplementation(persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["EXPLORATORY"])
+    user = UserImplementation(args, persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["LOYAL"])
     recommender = RecommenderImplementation()
-    env = Environment(user, recommender)
+    env = Environment(args, user, recommender)
     env.run()
     # resp = recommender.chat("Find the availibility of 2024 Ford Mustang in Montgomery!")
     # print(resp)
+    if args.evaluate:
+        print("Final Score:", env.outcome["score"])
+
+
+if __name__ == "__main__":
+    main()
