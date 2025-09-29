@@ -13,22 +13,6 @@ class Environment:
         self.conversation_log = []
         self.outcome = None  # store outcome as dict
 
-    # def run(self):
-    #     print("Environment is running ...")
-    #     print("-" * 40)
-
-    #     next_recommender_response = None
-    #     while True:
-    #         user_msg = self.user.chat(next_recommender_response)
-    #         if "###BUY###" in user_msg or "###ABORT###" in user_msg:
-    #             print("\n" + "*"*90 + "\n" + f"User: {user_msg}")
-    #             break
-
-    #         print("\n" + "="*90 + "\n" + f"User: {user_msg}")
-
-    #         next_recommender_response = self.recommender.chat(user_msg)
-    #         print("\n" + "="*90 + "\n" + f"Recommender: {next_recommender_response}")
-
     def run(self):
         print("Environment is running ...")
         print("-" * 40)
@@ -49,10 +33,10 @@ class Environment:
                 if "###BUY###" in user_msg and self.args.evaluate:
                     match = re.search(r"^(.*?)###BUY###", user_msg.strip(), re.IGNORECASE)
                     car_name = match.group(1).strip() if match and match.group(1).strip() else None
-                    self.outcome = {"score": 1, "decision": "BUY", "car_name": car_name}
+                    self.outcome = {"decision": "BUY", "car_name": car_name}
 
                 elif "###ABORT###" in user_msg and self.args.evaluate:
-                    self.outcome = {"score": 0, "decision": "ABORT", "car_name": None}
+                    self.outcome = {"decision": "ABORT", "car_name": None}
 
                 break  # terminate loop
 

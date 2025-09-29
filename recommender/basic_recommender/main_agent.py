@@ -35,6 +35,10 @@ class UpdateCarProfileSchema(BaseModel):
     budget: Optional[int] = Field(None, description="Maximum budget in USD")
     preferred_brands: Optional[List[str]] = Field(None, description="Preferred brands")
     fuel_type: Optional[FuelType] = Field(None, description="Fuel type")
+    location: Optional[List[str]] = Field(
+        None, 
+        description="User location as [Country, State, City, Zipcode]"
+    )
 
 
 def merge_partial_update(state: CarRecommendationState, update: UpdateCarProfileSchema) -> dict:
@@ -46,14 +50,22 @@ def merge_partial_update(state: CarRecommendationState, update: UpdateCarProfile
             continue
 
         # Special handling for lists: extend instead of replace
-        if isinstance(value, list) and field_name == "preferred_brands":
+        if field_name == "preferred_brands" and isinstance(value, list):
             existing = state.get(field_name, []) or []
             # Avoid duplicates
             new_brands = [brand for brand in value if brand not in existing]
             if new_brands:
                 updates[field_name] = existing + new_brands
+
+        # Special handling for location: set only if not already in state
+        elif field_name == "location":
+            if state.get("location") is None:
+                updates["location"] = value
+
+        # Regular assignment for all other fields
         else:
             updates[field_name] = value
+
     updates["messages"] = state["messages"]
     return updates
 
@@ -66,14 +78,32 @@ def agent_node(state: CarRecommendationState):
     structured_llm = llm.with_structured_output(UpdateCarProfileSchema)
 
     # Extract information from user input
+    # result = structured_llm.invoke([
+    #     SystemMessage(content="""Extract only the fields the user explicitly mentioned. 
+    #     If not specified, leave it as null. Do NOT guess or infer.
+
+    #     Examples:
+    #     - "I want a Toyota under $25000" -> budget: 25000, preferred_brands: ["Toyota"]
+    #     - "I prefer electric cars" -> fuel_type: "electric"
+    #     - "My budget is 30k" -> budget: 30000"""),
+    #     last_message
+    # ])
     result = structured_llm.invoke([
         SystemMessage(content="""Extract only the fields the user explicitly mentioned. 
-        If not specified, leave it as null. Do NOT guess or infer.
+    If not specified, leave it as null. Do NOT guess or infer.
 
-        Examples:
-        - "I want a Toyota under $25000" -> budget: 25000, preferred_brands: ["Toyota"]
-        - "I prefer electric cars" -> fuel_type: "electric"
-        - "My budget is 30k" -> budget: 30000"""),
+    Fields to extract:
+    - budget: integer (USD)
+    - preferred_brands: list of brand names
+    - fuel_type: one of ["petrol", "diesel", "electric", "hybrid"]
+    - location: list in the format [Country, State, City, Zipcode] — only extract if the user clearly mentions it.
+
+    Examples:
+    - "I want a Toyota under $25000" -> budget: 25000, preferred_brands: ["Toyota"]
+    - "I prefer electric cars" -> fuel_type: "electric"
+    - "My budget is 30k" -> budget: 30000
+    - "I'm in Readyville, TN 37149" -> location: ["USA", "TN", "Readyville", "37149"]
+    """),
         last_message
     ])
 
@@ -84,7 +114,8 @@ def agent_node(state: CarRecommendationState):
     profile_summary = {
         "budget": updates.get("budget", state.get("budget")),
         "preferred_brands": updates.get("preferred_brands", state.get("preferred_brands", [])),
-        "fuel_type": updates.get("fuel_type", state.get("fuel_type"))
+        "fuel_type": updates.get("fuel_type", state.get("fuel_type")),
+        "location": state.get("location")
     }
 
     # Set of all tools to be bound

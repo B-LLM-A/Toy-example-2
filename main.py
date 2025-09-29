@@ -32,9 +32,6 @@ def main():
     env.run()
     # resp = recommender.chat("Find the availibility of 2024 Ford Mustang in Montgomery!")
     # print(resp)
-    if args.evaluate:
-        print("Final Score:", env.outcome["score"])
-
 
 if __name__ == "__main__":
     main()

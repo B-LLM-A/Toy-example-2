@@ -68,10 +68,10 @@ def lookup_coords_api(city, state):
 
 def get_coordinates(city, state):
     """Get coordinates from local data or API fallback."""
-    coords = lookup_coords_local(city, state)
-    if coords:
-        return coords
-    print(f"[DEBUG] No local match for: ({city}, {state}) — querying API...")
+    # coords = lookup_coords_local(city, state)
+    # if coords:
+    #     return coords
+    # print(f"[DEBUG] No local match for: ({city}, {state}) — querying API...")
     return lookup_coords_api(city, state)
 
 # -----------------------
