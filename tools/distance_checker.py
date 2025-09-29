@@ -1,63 +1,106 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
-import csv
 import math
+import csv
 import os
+import requests
 
-# ===== LOAD DATASET =====
-CITY_STATE_COORDS = {}
+# -----------------------
+# Input schema
+# -----------------------
+class DistanceCheckInput(BaseModel):
+    user_city: str = Field(..., description="User's city name")
+    user_state: str = Field(..., description="User's state name")
+    dealer_city: str = Field(..., description="Dealer's city name")
+    dealer_state: str = Field(..., description="Dealer's state name")
+    threshold_miles: float = Field(..., description="Max allowed distance in miles")
 
-def load_city_state_coords(csv_path="recommender/data/uscities.csv"):
-    if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"Dataset not found at {csv_path}")
+# -----------------------
+# Helpers
+# -----------------------
+def haversine(lat1, lon1, lat2, lon2):
+    """Returns distance in miles between two lat/lon points."""
+    R = 3959.87433  # Earth radius in miles
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = (math.sin(dphi / 2) ** 2 +
+         math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2)
+    return R * (2 * math.atan2(math.sqrt(a), math.sqrt(1 - a)))
+
+def load_city_coords():
+    """Load city/state → coordinates from uscities.csv"""
+    coords_map = {}
+    csv_path = "recommender/data/uscities.csv"
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            key = (row["city"].strip().title(), row["state_id"].strip().upper())
-            CITY_STATE_COORDS[key] = (float(row["lat"]), float(row["lng"]))
+            coords_map[(row["city"].strip().lower(), row["state_name"].strip().lower())] = (
+                float(row["lat"]), float(row["lng"])
+            )
+    return coords_map
 
-# Call this on module import
-load_city_state_coords()
+LOCAL_COORDS = load_city_coords()
 
-# ===== HELPER FUNCTIONS =====
-def haversine(lat1, lon1, lat2, lon2):
-    R = 3958.8  # Earth radius in miles
-    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    return R * c
+def lookup_coords_local(city, state):
+    """Check local dataset for coordinates."""
+    return LOCAL_COORDS.get((city.strip().lower(), state.strip().lower()))
 
-def get_lat_lon_for_user(city, state, zip_code=None, zip_coords=None):
-    # Optional: zip_coords dict if you add ZIP lookup from another dataset
-    if zip_code and zip_coords and zip_code in zip_coords:
-        return zip_coords[zip_code]
-    return CITY_STATE_COORDS.get((city.strip().title(), state.strip().upper()))
+def lookup_coords_api(city, state):
+    """Fallback to Nominatim OpenStreetMap API."""
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        "city": city,
+        "state": state,
+        "country": "USA",
+        "format": "json",
+        "limit": 1
+    }
+    try:
+        resp = requests.get(url, params=params, headers={"User-Agent": "dealer-eval-agent"})
+        if resp.status_code == 200:
+            data = resp.json()
+            if data:
+                return float(data[0]["lat"]), float(data[0]["lon"])
+    except Exception as e:
+        print(f"[DEBUG] Geocoding API error for ({city}, {state}): {e}")
+    return None
 
-def get_lat_lon_for_dealer(city, state):
-    return CITY_STATE_COORDS.get((city.strip().title(), state.strip().upper()))
+def get_coordinates(city, state):
+    """Get coordinates from local data or API fallback."""
+    coords = lookup_coords_local(city, state)
+    if coords:
+        return coords
+    print(f"[DEBUG] No local match for: ({city}, {state}) — querying API...")
+    return lookup_coords_api(city, state)
 
-# ===== TOOL SCHEMA =====
-class DistanceCheckInput(BaseModel):
-    user_city: str = Field(..., description="City where the user is located")
-    user_state: str = Field(..., description="State where the user is located")
-    user_zip: str = Field(None, description="Optional ZIP code for the user")
-    dealer_city: str = Field(..., description="City where the dealer is located")
-    dealer_state: str = Field(..., description="State where the dealer is located")
-    threshold_miles: float = Field(50, description="Max distance in miles to consider 'nearby'")
+# -----------------------
+# LangChain tool
+# -----------------------
+@tool(args_schema=DistanceCheckInput)
+def distance_check(user_city, user_state, dealer_city, dealer_state, threshold_miles):
+    """
+    Check if dealer is within a threshold distance (miles) from user.
+    Uses local dataset first, then falls back to Nominatim API.
+    """
+    print(f"[DEBUG] distance_check called:\n"
+          f"  User -> City: '{user_city}', State: '{user_state}'\n"
+          f"  Dealer -> City: '{dealer_city}', State: '{dealer_state}'\n"
+          f"  Threshold: {threshold_miles} miles")
 
-@tool("distance_check", args_schema=DistanceCheckInput)
-def distance_check(user_city, user_state, user_zip, dealer_city, dealer_state, threshold_miles):
-    """Check if a dealer is within the given distance threshold from the user using city/state mapping."""
-    user_coords = get_lat_lon_for_user(user_city, user_state)
-    dealer_coords = get_lat_lon_for_dealer(dealer_city, dealer_state)
+    user_coords = get_coordinates(user_city, user_state)
+    dealer_coords = get_coordinates(dealer_city, dealer_state)
+
+    if not user_coords:
+        print(f"[DEBUG] Coordinates not found for: ({user_city}, {user_state})")
+    if not dealer_coords:
+        print(f"[DEBUG] Coordinates not found for: ({dealer_city}, {dealer_state})")
 
     if not user_coords or not dealer_coords:
-        return {"error": "Coordinates not found for one or both locations."}
+        return False
 
-    dist = haversine(*user_coords, *dealer_coords)
-    return {
-        "distance_miles": round(dist, 2),
-        "nearby": dist <= threshold_miles
-    }
+    distance = haversine(user_coords[0], user_coords[1], dealer_coords[0], dealer_coords[1])
+    nearby = distance <= threshold_miles
+
+    print(f"[DEBUG] Computed distance: {distance:.2f} miles -> Nearby? {nearby}")
+    return nearby
