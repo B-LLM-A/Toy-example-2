@@ -1,58 +1,76 @@
 import os
 import requests
-from typing import Any, Dict, List, Optional
-from langchain.tools import tool
 import logging
+from typing import Dict
+from langchain.tools import tool
+from dotenv import load_dotenv
 
-AUTO_DEV_API_KEY = os.getenv("AUTO_DEV_API_KEY")  # keep your API key in env var
+# --- Load environment ---
+load_dotenv()  # ensures .env values are loaded before we run anything
+
 LOGGER = logging.getLogger("AutoDev")
-_MAX_LOG_BODY = 1500
-
-def _truncate(text: Optional[str], limit: int = _MAX_LOG_BODY) -> str:
-    if not text:
-        return ""
-    return text if len(text) <= limit else text[:limit] + f"... [truncated {len(text) - limit} chars]"
 
 @tool("auto_dev_inventory", return_direct=False)
-def auto_dev_inventory_tool(make: str = None, model: str = None, location: str = None, budget: int = None, zipcode: int = None):
-    """
-    Query Auto.dev Vehicle Listings API to find cars for sale based on user preferences.
-    Args:
-        make (str, optional): Car brand (e.g. "Toyota")
-        model (str, optional): Car model (e.g. "Camry")
-        location (str, optional): City, state, or zipcode to search near
-        budget (int, optional): Maximum price in USD
-    Returns:
-        str: Summary of available listings (with dealer links).
-    """
+def auto_dev_inventory_tool(make: str = None, model: str = None, location: str = None,
+                            budget: int = None, zipcode: int = None) -> Dict:
+    """LangChain tool-compatible version — returns listings + summary."""
+    return _auto_dev_inventory_raw(make, model, location, budget, zipcode)
+
+
+def _auto_dev_inventory_raw(make: str = None, model: str = None, location: str = None,
+                            budget: int = None, zipcode: int = None) -> Dict:
+    """Plain Python callable — fetches inventory from Auto.dev, fallback to offline demo if no API key."""
+
+    # Re-fetch API key at call time
+    api_key = os.getenv("AUTO_DEV_API_KEY")
+
+    if not api_key:
+        LOGGER.warning("AUTO_DEV_API_KEY missing — using offline demo data.")
+        demo_listings = [{
+            "year": 2022,
+            "make": make or "Toyota",
+            "model": model or "Tacoma",
+            "trim": "SR",
+            "price": 32000,
+            "dealer": "Demo Dealer",
+            "city": location or "Orlando",
+            "state": "FL",
+            "vehicle_age": 3,
+        }]
+        return {
+            "listings": demo_listings,
+            "summary": "Offline mode demo listing — no live API call.",
+            "raw_api": {}
+        }
+
     url = "https://auto.dev/api/listings"
-    headers = {"Authorization": f"Bearer {AUTO_DEV_API_KEY}"}
+    headers = {"Authorization": f"Bearer {api_key}"}
     params = {
-        "make": make,
-        "model": model,
-        "location": location,
-        "price_max": budget,
-        "zip": zipcode,
-        "limit": 5  # just get a few results
+        "make": make, "model": model, "location": location,
+        "price_max": budget, "zip": zipcode, "limit": 5
     }
-    LOGGER.info(f"HTTP GET {url} header{headers} params={params}")
+    LOGGER.info(f"HTTP GET {url} headers={headers} params={params}")
 
     try:
         resp = requests.get(url, headers=headers, params=params)
-        # resp.raise_for_status()
         data = resp.json()
         LOGGER.info(data)
 
-        if "listings" not in data or not data["listings"]:
-            # return f"No listings found for {make} {model} in {location} under ${budget}"
-            return data
-        
+        listings = data.get("listings") or data.get("data", [])
+        if not listings:
+            return {
+                "listings": [],
+                "summary": f"No listings found for {make} {model} in {location} under ${budget}",
+                "raw_api": data
+            }
+
         results = []
-        for car in data["data"]:
+        for car in listings:
             vehicle = car.get("vehicle", {})
             retail = car.get("retailListing", {})
 
-            title = f"{vehicle.get('year', '')} {vehicle.get('make', '')} {vehicle.get('model', '')} {vehicle.get('trim', '')}".strip()
+            title = f"{vehicle.get('year', '')} {vehicle.get('make', '')} " \
+                    f"{vehicle.get('model', '')} {vehicle.get('trim', '')}".strip()
             price = retail.get("price", "N/A")
             dealer = retail.get("dealer", "Unknown dealer")
             city = retail.get("city", "")
@@ -61,18 +79,22 @@ def auto_dev_inventory_tool(make: str = None, model: str = None, location: str =
             img = retail.get("primaryImage", "")
 
             line = f"- {title} | Price: ${price} | Dealer: {dealer} ({city}, {state})"
-            if link:
-                line += f" | [Details]({link})"
-            if img:
-                line += f" | Image: {img}"
-
+            if link: line += f" | [Details]({link})"
+            if img: line += f" | Image: {img}"
             results.append(line)
 
-        return "\n".join(results)
+        return {
+            "listings": listings,
+            "summary": "\n".join(results),
+            "raw_api": data
+        }
 
     except Exception as e:
-        return f"Error calling Auto.dev API: {str(e)}"
-        return "\n".join(results)
+        return {
+            "listings": [],
+            "summary": f"Error calling Auto.dev API: {str(e)}",
+            "raw_api": {}
+        }
 
-    except Exception as e:
-        return f"Error calling Auto.dev API: {str(e)}"
+# Raw function for internal direct calls
+auto_dev_inventory_tool_raw = _auto_dev_inventory_raw

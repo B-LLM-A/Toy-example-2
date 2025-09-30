@@ -83,10 +83,10 @@ def distance_check(user_city, user_state, dealer_city, dealer_state, threshold_m
     Check if dealer is within a threshold distance (miles) from user.
     Uses local dataset first, then falls back to Nominatim API.
     """
-    print(f"[DEBUG] distance_check called:\n"
-          f"  User -> City: '{user_city}', State: '{user_state}'\n"
-          f"  Dealer -> City: '{dealer_city}', State: '{dealer_state}'\n"
-          f"  Threshold: {threshold_miles} miles")
+    # print(f"[DEBUG] distance_check called:\n"
+    #       f"  User -> City: '{user_city}', State: '{user_state}'\n"
+    #       f"  Dealer -> City: '{dealer_city}', State: '{dealer_state}'\n"
+    #       f"  Threshold: {threshold_miles} miles")
 
     user_coords = get_coordinates(user_city, user_state)
     dealer_coords = get_coordinates(dealer_city, dealer_state)
@@ -102,5 +102,5 @@ def distance_check(user_city, user_state, dealer_city, dealer_state, threshold_m
     distance = haversine(user_coords[0], user_coords[1], dealer_coords[0], dealer_coords[1])
     nearby = distance <= threshold_miles
 
-    print(f"[DEBUG] Computed distance: {distance:.2f} miles -> Nearby? {nearby}")
+    # print(f"[DEBUG] Computed distance: {distance:.2f} miles -> Nearby? {nearby}")
     return nearby

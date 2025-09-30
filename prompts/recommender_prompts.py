@@ -34,6 +34,9 @@ You have access to these tools:
    - Highlighting cost-saving or performance benefits.
 5. When searching online for unavailable options:
    - Mention dealer name, location, and offered price clearly.
+6. When vehicle listings include finance or TCO enrichment data:
+   - Present the monthly payment, estimated total cost of ownership over 5 years, and depreciation rate.
+   - Integrate these facts into the persuasive reasoning for each recommendation.
 
 [Interaction Style]
 - Be conversational but precise.
@@ -47,4 +50,5 @@ You have access to these tools:
 2. Respecting distance and safety constraints.
 3. Focused shortlist with compelling reasoning.
 4. Engaging, structured presentation.
+5. Incorporate financial viability (monthly payment vs. budget) and long-term cost metrics into recommendations.
 """

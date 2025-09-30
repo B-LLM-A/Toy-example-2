@@ -8,6 +8,7 @@ from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
 from recommender.basic_recommender.fueleconomy_agent import FUELECONOMY_AGENT_TOOL
 from recommender.basic_recommender.nhtsa_agent import NHTSA_AGENT_TOOL
+from recommender.basic_recommender.car_detail_agent import CarDetailAgentTool
 from tools.websearch import tavily_tool
 # from tools.NHTSA import get_car_safety_details
 from tools.distance_checker import distance_check
@@ -28,7 +29,8 @@ class CarRecommendationState(MessagesState):
     budget: Optional[int]
     preferred_brands: Optional[List[str]]
     fuel_type: Optional[FuelType]
-    location: Optional[List[str]] # Country, State, City, Zipcode
+    location: Optional[List[str]] # Country, State, City
+    zipcode: Optional[int]
 
 
 class UpdateCarProfileSchema(BaseModel):
@@ -37,8 +39,9 @@ class UpdateCarProfileSchema(BaseModel):
     fuel_type: Optional[FuelType] = Field(None, description="Fuel type")
     location: Optional[List[str]] = Field(
         None, 
-        description="User location as [Country, State, City, Zipcode]"
+        description="User location as [Country, State, City]"
     )
+    zipcode: Optional[int] = Field(None, description="User Zipcode")
 
 
 def merge_partial_update(state: CarRecommendationState, update: UpdateCarProfileSchema) -> dict:
@@ -61,6 +64,10 @@ def merge_partial_update(state: CarRecommendationState, update: UpdateCarProfile
         elif field_name == "location":
             if state.get("location") is None:
                 updates["location"] = value
+        
+        elif field_name == "zipcode":
+            if state.get("zipcode") is None:
+                updates["zipcode"] = value
 
         # Regular assignment for all other fields
         else:
@@ -77,17 +84,6 @@ def agent_node(state: CarRecommendationState):
 
     structured_llm = llm.with_structured_output(UpdateCarProfileSchema)
 
-    # Extract information from user input
-    # result = structured_llm.invoke([
-    #     SystemMessage(content="""Extract only the fields the user explicitly mentioned. 
-    #     If not specified, leave it as null. Do NOT guess or infer.
-
-    #     Examples:
-    #     - "I want a Toyota under $25000" -> budget: 25000, preferred_brands: ["Toyota"]
-    #     - "I prefer electric cars" -> fuel_type: "electric"
-    #     - "My budget is 30k" -> budget: 30000"""),
-    #     last_message
-    # ])
     result = structured_llm.invoke([
         SystemMessage(content="""Extract only the fields the user explicitly mentioned. 
     If not specified, leave it as null. Do NOT guess or infer.
@@ -96,13 +92,14 @@ def agent_node(state: CarRecommendationState):
     - budget: integer (USD)
     - preferred_brands: list of brand names
     - fuel_type: one of ["petrol", "diesel", "electric", "hybrid"]
-    - location: list in the format [Country, State, City, Zipcode] — only extract if the user clearly mentions it.
+    - location: list in the format [Country, State, City] — only extract if the user clearly mentions it.
+    - zipcode: integer — only extract if the user clearly mentions it.
 
     Examples:
     - "I want a Toyota under $25000" -> budget: 25000, preferred_brands: ["Toyota"]
     - "I prefer electric cars" -> fuel_type: "electric"
     - "My budget is 30k" -> budget: 30000
-    - "I'm in Readyville, TN 37149" -> location: ["USA", "TN", "Readyville", "37149"]
+    - "I'm in Readyville, TN 37149" -> location: ["USA", "TN", "Readyville"] and -> zipcode: 37149
     """),
         last_message
     ])
@@ -112,10 +109,11 @@ def agent_node(state: CarRecommendationState):
 
     # Create profile summary
     profile_summary = {
-        "budget": updates.get("budget", state.get("budget")),
-        "preferred_brands": updates.get("preferred_brands", state.get("preferred_brands", [])),
-        "fuel_type": updates.get("fuel_type", state.get("fuel_type")),
-        "location": state.get("location")
+    "budget": updates.get("budget", state.get("budget")),
+    "preferred_brands": updates.get("preferred_brands", state.get("preferred_brands", [])),
+    "fuel_type": updates.get("fuel_type", state.get("fuel_type")),
+    "location": updates.get("location", state.get("location")),
+    "zipcode": updates.get("zipcode", state.get("zipcode"))
     }
 
     # Set of all tools to be bound
@@ -124,8 +122,9 @@ def agent_node(state: CarRecommendationState):
         # DuckDuckGoSearchResults(num_results=5),
         FUELECONOMY_AGENT_TOOL,
         NHTSA_AGENT_TOOL,
-        auto_dev_inventory_tool,
-        distance_check
+        # auto_dev_inventory_tool,
+        distance_check,
+        CarDetailAgentTool
     ]
 
     react_agent = create_react_agent(model=llm, tools=tools)
