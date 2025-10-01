@@ -106,7 +106,7 @@ def car_detail_agent_func(
 
 
 
-CarDetailAgentTool = StructuredTool.from_function(
+CAR_DETAIL_AGENT_TOOL = StructuredTool.from_function(
     func=car_detail_agent_func,
     name="car_detail_agent",
     description=(

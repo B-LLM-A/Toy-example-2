@@ -1,5 +1,6 @@
 import re
-from evaluation.dealer_evaluation_agent import run_dealer_eval_agent  # new import
+from evaluation.dealer_evaluation_agent import run_dealer_eval_agent
+from evaluation.shortlist_evaluation_agent import run_shortlist_eval_agent
 
 class ConversationEvaluator:
     def __init__(self, conversation_log, user_info):
@@ -71,5 +72,9 @@ class ConversationEvaluator:
             "asked_location": self.asked_location(),
             "dealers_within_100_miles": self.dealers_within_range(100),
             "included_safety_info": self.included_safety_info(),
-            "recommendation_list_short": self.recommendation_list_short()
+            # "recommendation_list_short": self.recommendation_list_short()
+            "recommendation_list_short": run_shortlist_eval_agent(
+                self.conversation_log,
+                max_items=3
+            )
         }

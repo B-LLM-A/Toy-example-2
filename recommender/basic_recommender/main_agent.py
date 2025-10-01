@@ -8,7 +8,7 @@ from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
 from recommender.basic_recommender.fueleconomy_agent import FUELECONOMY_AGENT_TOOL
 from recommender.basic_recommender.nhtsa_agent import NHTSA_AGENT_TOOL
-from recommender.basic_recommender.car_detail_agent import CarDetailAgentTool
+from recommender.basic_recommender.car_detail_agent import CAR_DETAIL_AGENT_TOOL
 from tools.websearch import tavily_tool
 # from tools.NHTSA import get_car_safety_details
 from tools.distance_checker import distance_check
@@ -124,7 +124,7 @@ def agent_node(state: CarRecommendationState):
         NHTSA_AGENT_TOOL,
         # auto_dev_inventory_tool,
         distance_check,
-        CarDetailAgentTool
+        CAR_DETAIL_AGENT_TOOL
     ]
 
     react_agent = create_react_agent(model=llm, tools=tools)
