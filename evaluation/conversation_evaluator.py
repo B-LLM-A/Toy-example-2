@@ -3,7 +3,8 @@ from evaluation.dealer_evaluation_agent import run_dealer_eval_agent
 from evaluation.shortlist_evaluation_agent import run_shortlist_eval_agent
 
 class ConversationEvaluator:
-    def __init__(self, conversation_log, user_info):
+    def __init__(self, args,  conversation_log, user_info):
+        self.args = args
         self.conversation_log = conversation_log
         self.user_info = user_info
 
@@ -45,7 +46,7 @@ class ConversationEvaluator:
                         break
 
         if not self.user_info or not self.user_info.get("city") or not self.user_info.get("state"):
-            print("Error!!!!!!!!!!!")
+            print("Evaluator Failed to catch users location.")
             return None
 
         agent_result = run_dealer_eval_agent(

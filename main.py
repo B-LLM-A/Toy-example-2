@@ -11,8 +11,9 @@ from judge.basic_judge.implementation import JudgeImplementation
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--evaluate", action='store_true')
-    parser.add_argument("--verbose", action='store_true')
+    parser.add_argument("--evaluate", action='store_true', help="Evaluate conversation after termination")
+    parser.add_argument("--verbose", action='store_true', help="Print for debugging")
+    parser.add_argument("--chat", action='store_true', help="Chat directly with the agent")
 
     return parser.parse_args()
 
@@ -25,9 +26,15 @@ def main():
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
-    judge = JudgeImplementation(llm)
-    user = UserImplementation(args, persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["LOYAL"])
+    # judge = JudgeImplementation(llm)
     recommender = RecommenderImplementation()
+    
+    if args.chat:
+        print("=== Direct Chat Mode ===")
+        print("Type 'exit' to quit.\n")
+        user = None
+    else:
+        user = UserImplementation(args, persona=PPERSONA, raw_review=PRAW_REVIEW, goal=GOALS["LOYAL"])
     env = Environment(args, user, recommender)
     env.run()
     # resp = recommender.chat("Find the availibility of 2024 Ford Mustang in Montgomery!")

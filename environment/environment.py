@@ -6,7 +6,7 @@ import re
 
 
 class Environment:
-    def __init__(self, args, user: IUserSimulator, recommender: IRecommenderSystem):
+    def __init__(self, args, user, recommender: IRecommenderSystem):
         self.args = args
         self.user = user
         self.recommender = recommender
@@ -23,7 +23,13 @@ class Environment:
 
         while True:
             # user simulation
-            user_msg = self.user.chat(next_recommender_response)
+            if self.args.chat:
+                user_msg = input("You: ").strip()
+                if user_msg.lower() in {"exit", "quit"}:
+                    self.outcome = {"decision": "EXIT", "car_name": None}
+                    break
+            else:
+                user_msg = self.user.chat(next_recommender_response)
             self.conversation_log.append({"role": "user", "content": user_msg})
 
             if "###BUY###" in user_msg or "###ABORT###" in user_msg:
@@ -41,14 +47,16 @@ class Environment:
                 break  # terminate loop
 
             # recommender simulation
-            print("\n" + "="*90 + "\n" + f"User: {user_msg}")
+            if not self.args.chat:
+                print("\n" + "="*90 + "\n" + f"User: {user_msg}")
             next_recommender_response = self.recommender.chat(user_msg)
             self.conversation_log.append({"role": "assistant", "content": next_recommender_response})
             print("\n" + "="*90 + "\n" + f"Recommender: {next_recommender_response}")
 
         # ---- run evaluator AFTER loop ends ----
         if self.outcome and self.args.evaluate:
-            evaluator = ConversationEvaluator(self.conversation_log, getattr(self.user, "location", None))
+            user_location = getattr(self.user, "location", None) if not self.args.chat else None
+            evaluator = ConversationEvaluator(self.args, self.conversation_log, user_location)
             extra_metrics = evaluator.evaluate_all()
             self.outcome.update(extra_metrics)
 

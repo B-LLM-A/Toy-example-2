@@ -61,7 +61,7 @@ def car_detail_agent_func(
             })
 
     if not listings:
-        print("OH NO!!!!!")
+        print("No listings Found!")
         return {
             "listings": [],
             "note": inventory_result.get("summary", "No listings found matching criteria."),
