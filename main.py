@@ -3,7 +3,7 @@ import logging
 import argparse
 
 from recommender.basic_recommender.implementation import RecommenderImplementation
-from user_simulator.basic_simulator.implementation import UserImplementation
+from user_simulator.simulator.implementation import UserImplementation
 from user_simulator.persona.GoalBased.persona_2 import PERSONA as GPERSONA, RAW_REVIEW as GRAW_REVIEW, GOALS
 from user_simulator.persona.JsonPersona.persona_2 import PERSONA as PPERSONA, RAW_REVIEW as PRAW_REVIEW
 from environment.environment import Environment

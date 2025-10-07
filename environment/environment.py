@@ -22,7 +22,7 @@ class Environment:
         self.outcome = None
 
         while True:
-            # user simulation
+            # User simulation or direct chat
             if self.args.chat:
                 user_msg = input("You: ").strip()
                 if user_msg.lower() in {"exit", "quit"}:
@@ -31,7 +31,7 @@ class Environment:
             else:
                 user_msg = self.user.chat(next_recommender_response)
             self.conversation_log.append({"role": "user", "content": user_msg})
-
+            # End of conversation
             if "###BUY###" in user_msg or "###ABORT###" in user_msg:
                 if self.args.verbose:
                     print("\n" + "*"*90 + "\n" + f"User: {user_msg}")
@@ -46,7 +46,7 @@ class Environment:
 
                 break  # terminate loop
 
-            # recommender simulation
+            # Recommender simulation
             if not self.args.chat:
                 print("\n" + "="*90 + "\n" + f"User: {user_msg}")
             next_recommender_response = self.recommender.chat(user_msg)

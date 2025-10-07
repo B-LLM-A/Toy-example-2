@@ -1,6 +1,7 @@
 import re
-from evaluation.dealer_evaluation_agent import run_dealer_eval_agent
-from evaluation.shortlist_evaluation_agent import run_shortlist_eval_agent
+from evaluation.evaluation_agents.dealer_evaluation_agent import run_dealer_eval_agent
+from evaluation.evaluation_agents.shortlist_evaluation_agent import run_shortlist_eval_agent
+from evaluation.evaluation_agents.budget_evaluation_agent import run_budget_eval_agent
 
 class ConversationEvaluator:
     def __init__(self, args,  conversation_log, user_info):
@@ -28,6 +29,9 @@ class ConversationEvaluator:
             for m in self.conversation_log if m['role'] == 'assistant'
         ]
         return all(length <= max_items for length in rec_list_lengths if length)
+    
+    def recommendation_within_budget(self):
+        pass
 
     def dealers_within_range(self, threshold_miles=100):
         # Ensure user_info from conversation if missing
@@ -72,6 +76,7 @@ class ConversationEvaluator:
         return {
             "asked_location": self.asked_location(),
             "dealers_within_100_miles": self.dealers_within_range(100),
+            "recommendations_within_budget": self.recommendation_within_budget(),
             "included_safety_info": self.included_safety_info(),
             # "recommendation_list_short": self.recommendation_list_short()
             "recommendation_list_short": run_shortlist_eval_agent(

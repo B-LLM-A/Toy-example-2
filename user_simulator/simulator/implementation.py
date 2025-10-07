@@ -15,7 +15,7 @@ class UserImplementation(IUserSimulator):
         self.args = args
         # Sample a location and store both structured & text versions
         location_str, location_struct = self._sample_location()
-        self.location = location_struct  # <<<< structured form
+        self.location = location_struct
 
         system_prompt_format = USER_SIMULATION_SYSTEM_PROMPT.format(
             persona=self.persona,

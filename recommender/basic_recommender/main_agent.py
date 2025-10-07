@@ -6,9 +6,9 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from prompts.recommender_prompts import PROFILE_EXTRACTOR_PROMPT
 from recommender.item_set import item_set
-from recommender.basic_recommender.fueleconomy_agent import FUELECONOMY_AGENT_TOOL
-from recommender.basic_recommender.nhtsa_agent import NHTSA_AGENT_TOOL
-from recommender.basic_recommender.car_detail_agent import CAR_DETAIL_AGENT_TOOL
+from recommender.basic_recommender.specialist_agents.fueleconomy_agent import FUELECONOMY_AGENT_TOOL
+from recommender.basic_recommender.specialist_agents.nhtsa_agent import NHTSA_AGENT_TOOL
+from recommender.basic_recommender.specialist_agents.car_detail_agent import CAR_DETAIL_AGENT_TOOL
 from tools.websearch import tavily_tool
 # from tools.NHTSA import get_car_safety_details
 from tools.distance_checker import distance_check
