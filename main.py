@@ -25,7 +25,7 @@ def main():
         # level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+    # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
     # judge = JudgeImplementation(llm)
     recommender = RecommenderImplementation()
     
